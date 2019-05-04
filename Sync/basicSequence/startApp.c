@@ -36,12 +36,11 @@ int main(void) {
     // set up a semaphore (? -> initial value of semaphor)
     // checkSem() -> macro defined in commonDefs.h
 
-    /*
-    myTurn = sem_open(MYTURN_SEMAPHOR, O_CREAT, 0700, ?); checkSem(myTurn);
-    coin   = sem_open(COIN_SEMAPHOR,   O_CREAT, 0700, ?); checkSem(coin);
-    coffee = sem_open(COFFEE_SEMAPHOR, O_CREAT, 0700, ?); checkSem(coffee);
-    ready  = sem_open(READY_SEMAPHOR,  O_CREAT, 0700, ?); checkSem(ready);
-    */
+    // $ all 0 (waiting for post), myTurn to 1 (enables first consumer)
+    myTurn = sem_open(MYTURN_SEMAPHOR, O_CREAT, 0700, 1); checkSem(myTurn);
+    coin   = sem_open(COIN_SEMAPHOR,   O_CREAT, 0700, 0); checkSem(coin);
+    coffee = sem_open(COFFEE_SEMAPHOR, O_CREAT, 0700, 0); checkSem(coffee);
+    ready  = sem_open(READY_SEMAPHOR,  O_CREAT, 0700, 0); checkSem(ready);
 
     // now that the resources are set up, the supervisor can be started
     for (j = 1; j <= CUSTOMERS; j++) {
