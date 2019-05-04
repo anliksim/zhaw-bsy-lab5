@@ -45,7 +45,7 @@ void *coffeeTeller(void* data) {
         // $ unlock common data
         pthread_mutex_unlock(&(cD->lock));
 
-        if (i%1000000 == 0) printf("working\n");
+        if (i%1000000 == 0) printf("working, %i\n", i);
         i++;
     }
     pthread_exit(0);
