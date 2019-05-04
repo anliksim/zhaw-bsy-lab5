@@ -29,7 +29,10 @@ void *coffeeTeller(void* data) {
     
     i = 0;
     while (i < ITERATIONS) {
+
+        // $ lock common data
         pthread_mutex_lock(&(cD->lock));
+
         if (cD->coinCount != cD->selCount1 + cD->selCount2) {
             printf("error c = %5d  s1 =%6d   s2 =%6d   diff: %4d\ti = %d\n", 
                    cD->coinCount, cD->selCount1, cD->selCount2, 
@@ -38,7 +41,10 @@ void *coffeeTeller(void* data) {
             cD->coinCount = 0;
             cD->selCount1 = cD->selCount2 = 0;
         }
+
+        // $ unlock common data
         pthread_mutex_unlock(&(cD->lock));
+
         if (i%1000000 == 0) printf("working\n");
         i++;
     }
