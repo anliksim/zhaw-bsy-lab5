@@ -61,16 +61,29 @@ void deleteBank(void) {
 long int withdraw(int branchNr, int accountNr, long int value) {
     int rv, tmp;
     rv = 0;
-    tmp = Bank[branchNr].accounts[accountNr].balance - value;
+
+    // $ lock account for atomic withdraw
+    Account* acc = &Bank[branchNr].accounts[accountNr];
+    pthread_mutex_lock(&acc->acntLock);
+
+    tmp = acc->balance - value;
     if (tmp >= 0) {
-        Bank[branchNr].accounts[accountNr].balance = tmp;
+        acc->balance = tmp;
         rv = value;
     }
+    pthread_mutex_unlock(&acc->acntLock);
+
     return rv;   
 }
 
 void deposit(int branchNr, int accountNr, long int value) {
-    Bank[branchNr].accounts[accountNr].balance += value;
+    // $ lock account for deposit
+    Account* acc = &Bank[branchNr].accounts[accountNr];
+    pthread_mutex_lock(&acc->acntLock);
+
+    acc->balance += value;
+
+    pthread_mutex_unlock(&acc->acntLock);
 }
 
 void transfer(int fromB, int toB, int accountNr, long int value) {
@@ -84,7 +97,13 @@ void checkAssets(void) {
     long sum = 0;
     for (int i = 0; i < nBranches; i++) {
         for (int j = 0; j < nAccounts; j++) {
-            sum += (long)Bank[i].accounts[j].balance;
+            // $ lock account to get correct value
+            Account* acc = &Bank[i].accounts[j];
+            pthread_mutex_lock(&acc->acntLock);
+
+            sum += (long)acc->balance;
+
+            pthread_mutex_unlock(&acc->acntLock);
         }
     }
     if (assets == 0) {
