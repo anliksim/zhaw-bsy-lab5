@@ -46,6 +46,7 @@ void makeBank(int num_branches, int num_accounts) {
         Bank[i].accounts = (Account *)malloc(naccounts * sizeof(Account));
         for (int j = 0; j < naccounts; j++) {
             Bank[i].accounts[j].balance = 0;
+            pthread_mutex_init((&(Bank[i].accounts[j].acntLock)), &attr);
         }
     }
 }
@@ -64,8 +65,8 @@ long int withdraw(int branchNr, int accountNr, long int value) {
     if (tmp >= 0) {
         Bank[branchNr].accounts[accountNr].balance = tmp;
         rv = value;
-    };
-    return rv;   
+    }
+    return rv;
 }
 
 void deposit(int branchNr, int accountNr, long int value) {
@@ -73,8 +74,17 @@ void deposit(int branchNr, int accountNr, long int value) {
 }
 
 void transfer(int fromB, int toB, int accountNr, long int value) {
+
+    Branch *from_Branch = &Bank[fromB];
+    Branch *to_Branch = &Bank[toB];
+
+    pthread_mutex_lock(&from_Branch->branchLock);
     int money = withdraw(fromB, accountNr, value);
+    pthread_mutex_unlock(&from_Branch->branchLock);
+
+    pthread_mutex_lock(&to_Branch->branchLock);
     deposit(toB, accountNr, money);
+    pthread_mutex_unlock(&to_Branch->branchLock);
 }
 
 void checkAssets(void) {
